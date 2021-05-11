@@ -4,6 +4,7 @@ import bs4
 import requests
 import random
 
+# TODO: Add habit info to json file, create a timer that will run in the background and display on the listbox
 
 # Define fonts and colours
 blue = "#29335C"
@@ -17,7 +18,7 @@ def get_daily_quote():
     """Scrape a quote website and obtain a random page and quote, along with the author.
     Returns a string to be used underneath the title. Will change upon each open."""
 
-    random_num = random.randint(1, 9)
+    random_num = random.randint(1, 10)
     url = requests.get("https://quotes.toscrape.com/page/" + str(random_num) + "/")
     quote_soup = bs4.BeautifulSoup(url.text, "lxml")
 
@@ -27,27 +28,64 @@ def get_daily_quote():
     daily_quotes_list = []
     daily_authors_list = []
 
-    for i in range(1, 10):
+    for i in range(1, 9):
         daily_quotes_list.append(daily_quotes[i].text)
         daily_authors_list.append(daily_authors[i].text)
 
-    quote_author_random_number = random.randint(1, 10)
+    quote_author_random_number = random.randint(1, 7)
     return daily_authors_list[quote_author_random_number] + ": " + daily_quotes_list[quote_author_random_number]
+
+
+def add_new_habit(habit):
+    """Adds a new habit to the habits_listbox widget."""
+    if habit == "":
+        return None
+    else:
+        habits_listbox.insert(tk.END, "Habit: " + habit)
 
 
 root = tk.Tk()
 root.title("Habit Breaker")
 root.iconbitmap("thumbs_up.ico")
-root.geometry("500x500")
+root.geometry("600x600")
 root.resizable(0, 0)
 root.config(bg=blue)
 
-title_frame = tk.Frame(root)
-title_frame.pack(padx=5, pady=5)
+title_frame = tk.Frame(root, bg=yellow)
+title_frame.pack()
+
+main_frame = tk.Frame(root, bg=blue)
+main_frame.pack(padx=10, pady=10)
+
+scroll_frame = tk.Frame(main_frame, bg=blue)
+scroll_frame.grid(row=0, column=0, padx=10, pady=10)
+
+add_new_frame = tk.Frame(main_frame, bg=blue)
+add_new_frame.grid(row=0, column=1, padx=10, pady=10)
 
 title = tk.Label(title_frame, text="Habit Breaker", font=title_font, bg=yellow, width=60)
 title.pack()
 
+title_quote = tk.Label(title_frame, text=get_daily_quote(), font=("Candara", 10), bg=yellow, width=98)
+title_quote.pack()
+title_quote.bind('<Configure>', lambda wrap_text: title_quote.config(wraplength=root.winfo_width()))
+
+habits_listbox = tk.Listbox(scroll_frame, width=50)
+habits_listbox.grid(row=0, column=0, sticky='nsew', rowspan=2)
+habits_listbox.config(border=2, relief='sunken')
+
+listbox_scroll = tk.Scrollbar(scroll_frame, orient=tk.VERTICAL, command=habits_listbox.yview)
+listbox_scroll.grid(row=0, column=0, sticky='nsw', rowspan=2)
+
+add_new_habit_label = tk.Label(add_new_frame, text="Habit Name: ", font=main_font, bg=yellow)
+add_new_habit_label.grid(row=0, column=0)
+
+add_new_habit_entry = tk.Entry(add_new_frame, font=main_font, bg=yellow)
+add_new_habit_entry.grid(row=1, column=0, pady=35)
+
+add_new_habit_button = tk.Button(add_new_frame, text="Add a new habit", font=main_font, bg=yellow,
+                                 command=lambda: add_new_habit(add_new_habit_entry.get()))
+add_new_habit_button.grid(row=2, column=0)
+
 root.mainloop()
 
-print(get_daily_quote())
