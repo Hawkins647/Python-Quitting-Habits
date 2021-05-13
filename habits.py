@@ -3,8 +3,9 @@ import json
 import bs4
 import requests
 import random
+import time
 
-# TODO: Add habit info to json file, create a timer that will run in the background and display on the listbox, add ability to delete elements from listbox
+# TODO: Create a timer that will run in the background and display on the listbox, add ability to delete elements from listbox
 
 # Define fonts and colours
 blue = "#29335C"
@@ -14,23 +15,33 @@ main_font = ("Candara", 14)
 
 # Define global variables
 habits_list = []
+time_list = []
 
 
 # Define Functions
 def load_json_data():
-    global habits_list
-
-    """Get the data from the json file (if it exists) and load it into the habits list, also inserting those 
+    """Get the data from the json file (if it exists) and load it into the habits list, also inserting those
     elements into the listbox."""
+
+    global habits_list
+    global time_list
+
     try:
-        with open("habits.json", "r") as file:
-            data = json.loads(file.read())
+        with open("habits.json", "r") as habit_file:
+            data = json.loads(habit_file.read())
             habits_list = data
-    except FileNotFoundError:
+    except:
         habits_list = []
 
-    for val in habits_list:
-        habits_listbox.insert(tk.END, "Habit: " + val)
+    try:
+        with open("times.json", "r") as time_file:
+            data = json.loads(time_file.read())
+            time_list = data
+    except:
+        time_list = []
+
+    for i in range(len(habits_list)):
+        habits_listbox.insert(tk.END, "Habit: " + habits_list[i] + ", Time: " + time_list[i])
 
 
 def get_daily_quote():
@@ -58,20 +69,30 @@ def get_daily_quote():
 def add_new_habit(habit):
     """Adds a new habit to the habits_listbox widget."""
     global habits_list
+    global time_list
 
     if habit == "":
         return None
     else:
-        habits_listbox.insert(tk.END, "Habit: " + habit)
+        habits_listbox.insert(tk.END, "Habit: " + habit + ", Time: " + time.ctime())
         habits_list.append(habit)
+        time_list.append(time.ctime())
 
 
-def save_data():
+def save_habit_data():
+    """Save the data to a json file when the root window has finished running."""
     global habits_list
 
-    """Save the data to a json file when the root window has finished running."""
     with open("habits.json", "w") as file:
         json.dump(habits_list, file)
+
+
+def save_time_data():
+    """Save the time data to a seperate json list"""
+    global time_list
+
+    with open("times.json", "w") as file:
+        json.dump(time_list, file)
 
 
 root = tk.Tk()
@@ -120,4 +141,11 @@ add_new_habit_button.grid(row=2, column=0)
 load_json_data()
 root.mainloop()
 
-save_data()
+save_habit_data()
+save_time_data()
+
+# date
+print(time.ctime()[8:11])
+# month
+print(time.ctime()[4:8])
+
