@@ -4,7 +4,7 @@ import bs4
 import requests
 import random
 
-# TODO: Add habit info to json file, create a timer that will run in the background and display on the listbox
+# TODO: Add habit info to json file, create a timer that will run in the background and display on the listbox, add ability to delete elements from listbox
 
 # Define fonts and colours
 blue = "#29335C"
@@ -12,8 +12,27 @@ yellow = "#F3A712"
 title_font = ("Candara", 20)
 main_font = ("Candara", 14)
 
+# Define global variables
+habits_list = []
+
 
 # Define Functions
+def load_json_data():
+    global habits_list
+
+    """Get the data from the json file (if it exists) and load it into the habits list, also inserting those 
+    elements into the listbox."""
+    try:
+        with open("habits.json", "r") as file:
+            data = json.loads(file.read())
+            habits_list = data
+    except FileNotFoundError:
+        habits_list = []
+
+    for val in habits_list:
+        habits_listbox.insert(tk.END, "Habit: " + val)
+
+
 def get_daily_quote():
     """Scrape a quote website and obtain a random page and quote, along with the author.
     Returns a string to be used underneath the title. Will change upon each open."""
@@ -38,10 +57,21 @@ def get_daily_quote():
 
 def add_new_habit(habit):
     """Adds a new habit to the habits_listbox widget."""
+    global habits_list
+
     if habit == "":
         return None
     else:
         habits_listbox.insert(tk.END, "Habit: " + habit)
+        habits_list.append(habit)
+
+
+def save_data():
+    global habits_list
+
+    """Save the data to a json file when the root window has finished running."""
+    with open("habits.json", "w") as file:
+        json.dump(habits_list, file)
 
 
 root = tk.Tk()
@@ -71,7 +101,7 @@ title_quote.pack()
 title_quote.bind('<Configure>', lambda wrap_text: title_quote.config(wraplength=root.winfo_width()))
 
 habits_listbox = tk.Listbox(scroll_frame, width=50)
-habits_listbox.grid(row=0, column=0, sticky='nsew', rowspan=2)
+habits_listbox.grid(row=0, column=1, sticky='nsew', rowspan=2)
 habits_listbox.config(border=2, relief='sunken')
 
 listbox_scroll = tk.Scrollbar(scroll_frame, orient=tk.VERTICAL, command=habits_listbox.yview)
@@ -87,5 +117,7 @@ add_new_habit_button = tk.Button(add_new_frame, text="Add a new habit", font=mai
                                  command=lambda: add_new_habit(add_new_habit_entry.get()))
 add_new_habit_button.grid(row=2, column=0)
 
+load_json_data()
 root.mainloop()
 
+save_data()
