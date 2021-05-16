@@ -4,9 +4,7 @@ import bs4
 import requests
 import random
 import datetime
-from datetime import timedelta
 
-# TODO: Add ability to delete elements from listbox
 
 # Define fonts and colours
 blue = "#29335C"
@@ -68,7 +66,7 @@ def get_daily_quote():
 
 
 def add_new_habit(habit):
-    """Adds a new habit to the habits_listbox widget."""
+    """Adds a new habit to the habits_listbox widget, and to the appropriate lists."""
     global habits_list
     global time_list
 
@@ -106,6 +104,25 @@ def convert_time(time: str):
         return str(datetime.datetime.now() - datetime.datetime(int(time[0:4]), int(time[6:7]), int(time[8:10])))
     else:
         return str(datetime.datetime.now() - datetime.datetime(int(time[0:4]), int(time[5:7]), int(time[8:10])))
+
+
+def delete_habit(scrollbox):
+    """Delete a selected habit from the scrollbox, and the respective lists."""
+    global time_list
+    global habits_list
+
+    for i in scrollbox.curselection():
+        # Split the selection into a list
+        value_list = scrollbox.get(i).split()
+
+    # get the index of the selected value
+    index = habits_list.index(value_list[1].strip(","))
+
+    for i in range(len(habits_list)):
+        if i == index:
+            del habits_list[i]
+            del time_list[i]
+            scrollbox.delete(i)
 
 
 root = tk.Tk()
@@ -150,6 +167,9 @@ add_new_habit_entry.grid(row=1, column=0, pady=35)
 add_new_habit_button = tk.Button(add_new_frame, text="Add a new habit", font=main_font, bg=yellow,
                                  command=lambda: add_new_habit(add_new_habit_entry.get()))
 add_new_habit_button.grid(row=2, column=0)
+
+delete_habit_button = tk.Button(root, text="Delete a habit (select from the list)", font=main_font, bg=yellow, width=50, command=lambda: delete_habit(habits_listbox))
+delete_habit_button.pack(pady=20)
 
 load_json_data()
 root.mainloop()
